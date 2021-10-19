@@ -1,0 +1,15 @@
+07:43:05:threadShowAndonDetails(): System.IndexOutOfRangeException: Cannot find table 0.
+   at System.Data.DataTableCollection.get_Item(Int32 index)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\Line\LineHyp-Current\LineHypSub-2021-01-25\Forms\frmProductCheckHistory1.cs:line 495
+07:43:36:threadShowAndonDetails(): System.IndexOutOfRangeException: Cannot find table 0.
+   at System.Data.DataTableCollection.get_Item(Int32 index)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\Line\LineHyp-Current\LineHypSub-2021-01-25\Forms\frmProductCheckHistory1.cs:line 495
+07:44:07:threadShowAndonDetails(): System.IndexOutOfRangeException: Cannot find table 0.
+   at System.Data.DataTableCollection.get_Item(Int32 index)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\Line\LineHyp-Current\LineHypSub-2021-01-25\Forms\frmProductCheckHistory1.cs:line 495
+07:44:38:threadShowAndonDetails(): System.IndexOutOfRangeException: Cannot find table 0.
+   at System.Data.DataTableCollection.get_Item(Int32 index)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\Line\LineHyp-Current\LineHypSub-2021-01-25\Forms\frmProductCheckHistory1.cs:line 495
+07:45:09:threadShowAndonDetails(): System.IndexOutOfRangeException: Cannot find table 0.
+   at System.Data.DataTableCollection.get_Item(Int32 index)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\Line\LineHyp-Current\LineHypSub-2021-01-25\Forms\frmProductCheckHistory1.cs:line 495

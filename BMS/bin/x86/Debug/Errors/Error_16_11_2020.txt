@@ -1,0 +1,12 @@
+13:42:38:threadShowAndonDetails(): System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'frmProductCheckHistory1'.
+   at System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   at System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+   at System.Windows.Forms.Control.Invoke(Delegate method)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\LineHyp-13-11-2020\Forms\frmProductCheckHistory1.cs:line 296
+17:17:11:threadShowAndonDetails(): System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'frmProductCheckHistory1'.
+   at System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+   at System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+   at System.Windows.Forms.Control.Invoke(Delegate method)
+   at BMS.frmProductCheckHistory1.threadShowAndonDetails() in D:\project\Sumitomo\Line\Hyponic\LineHyp-13-11-2020\Forms\frmProductCheckHistory1.cs:line 296

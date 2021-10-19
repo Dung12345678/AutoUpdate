@@ -1,0 +1,138 @@
+<Tables>
+
+	<Table>
+		<name>CheckMotor</name>
+		<column>
+			<name>iD</name>
+			<dataType>int</dataType>
+			<isPK>true</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias></alias>
+			<number>0</number>
+		</column>
+		<column>
+			<name>cardNo</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Card No</alias>
+			<number>1</number>
+		</column>
+		<column>
+			<name>salesOrder</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Sales Order</alias>
+			<number>2</number>
+		</column>
+		<column>
+			<name>orderedQty</name>
+			<dataType>int</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Ordered Qty</alias>
+			<number>3</number>
+		</column>
+		<column>
+			<name>qtyOfShipOrder</name>
+			<dataType>int</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Qty Of Ship Order</alias>
+			<number>4</number>
+		</column>
+		<column>
+			<name>motorInspSealNo</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Motor Insp Seal No</alias>
+			<number>5</number>
+		</column>
+		<column>
+			<name>serialNo</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Serial No</alias>
+			<number>6</number>
+		</column>
+		<column>
+			<name>articleID</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Article</alias>
+			<number>7</number>
+		</column>
+		<column>
+			<name>assemblyOrderNo</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Assembly Order No</alias>
+			<number>8</number>
+		</column>
+		<column>
+			<name>noOfJG</name>
+			<dataType>int</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>No Of J G</alias>
+			<number>9</number>
+		</column>
+		<column>
+			<name>descriptions</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>Descriptions</alias>
+			<number>10</number>
+		</column>
+		<column>
+			<name>uPR</name>
+			<dataType>nvarchar</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>U P R</alias>
+			<number>11</number>
+		</column>
+		<column>
+			<name>jGDate</name>
+			<dataType>datetime</dataType>
+			<isPK>false</isPK>
+			<isFK>false</isFK>
+			<isUnique>false</isUnique>
+			<tableRelate></tableRelate>
+			<alias>J G Date</alias>
+			<number>12</number>
+		</column>
+	</Table>
+
+</Tables>
+
