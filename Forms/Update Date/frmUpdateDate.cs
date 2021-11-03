@@ -69,6 +69,8 @@ namespace BMS
 		string pathLOT = Application.StartupPath + "/UpdateDateLOT.txt";
 		string pathSaves = System.Windows.Forms.Application.StartupPath + "/SaveOrder.txt";
 		string pathPlanHypAndAltax = System.Windows.Forms.Application.StartupPath + "/SavePlanHypAndAltax.txt";
+		string targetPath = @"D:\FileUpdate";
+		string targetPathError = @"U:\Public\0. Kaizen Altax\DUNG\RTC\UpdateError";
 		string pathBrowseMotor = "";
 		//string pathOrder = "";
 		//string path = "";
@@ -126,9 +128,20 @@ namespace BMS
 			{
 				File.WriteAllText(pathLOT, "");
 			}
-			if (!Directory.Exists(@"D:\FileUpdate"))
+			if (!Directory.Exists(targetPath))
 			{
-				Directory.CreateDirectory(@"D:\FileUpdate");
+				Directory.CreateDirectory(targetPath);
+			}
+			try
+			{
+				if (!Directory.Exists(targetPathError))
+				{
+					Directory.CreateDirectory(targetPathError);
+				}
+			}
+			catch
+			{
+
 			}
 		}
 		private void frmUpdateDate_Load(object sender, EventArgs e)
@@ -223,7 +236,6 @@ namespace BMS
 								string[] PathSplit = btnBrowseLOT.Text.Trim().Split('\\');
 								Path1 = PathSplit[PathSplit.Length - 1];
 								//Đường dẫn file Update
-								string targetPath = @"D:\FileUpdate";
 								string sourceFile = System.IO.Path.Combine(sourcePath);
 								string destFile = System.IO.Path.Combine(targetPath, Path1);
 								//Copy file từ file nguồn đến file đích
@@ -401,7 +413,7 @@ namespace BMS
 								string[] PathSplit = btnBrowseSTD.Text.Trim().Split('\\');
 								Path1 = PathSplit[PathSplit.Length - 1];
 								//Đường dẫn file Update
-								string targetPath = @"D:\FileUpdate";
+
 								string sourceFile = System.IO.Path.Combine(sourcePath);
 								string destFile = System.IO.Path.Combine(targetPath, Path1);
 								//Copy file từ file nguồn đến file đích
@@ -423,6 +435,7 @@ namespace BMS
 							string filename = @"D:\FileUpdate\" + Path1;
 							//Tạo bảng
 							dttSTD = new DataTable();
+							#region
 							//THêm cột vào bảng
 							dttSTD.Columns.Add("F1");
 							dttSTD.Columns.Add("F2");
@@ -472,6 +485,7 @@ namespace BMS
 							dttSTD.Columns.Add("F46");
 							dttSTD.Columns.Add("F47");
 							dttSTD.Columns.Add("F48");
+							#endregion
 							//gọi hàm đọc file txt
 							string noidung = Lib.GetFileContentTXT(filename);
 							//Cắt xuống dòng -"\n"
@@ -486,6 +500,7 @@ namespace BMS
 								string[] _dong = dong.Split('\t');
 								if (_dong.Count() < 47) continue;
 								DataRow dr1 = dttSTD.NewRow();
+								#region
 								dr1["F1"] = _dong[0];//Br
 								dr1["F2"] = _dong[1];//GoodsCode
 								dr1["F3"] = _dong[2];
@@ -534,7 +549,7 @@ namespace BMS
 								dr1["F46"] = _dong[45];
 								dr1["F47"] = _dong[46];
 								dr1["F48"] = _dong[47];
-
+								#endregion
 								dttSTD.Rows.Add(dr1);
 							}
 
@@ -695,7 +710,6 @@ namespace BMS
 								string[] PathSplit = btnBrowseDao.Text.Trim().Split('\\');
 								Path1 = PathSplit[PathSplit.Length - 1];
 								//Đường dẫn file Update
-								string targetPath = @"D:\FileUpdate";
 								string sourceFile = System.IO.Path.Combine(sourcePath);
 								string destFile = System.IO.Path.Combine(targetPath, Path1);
 								//Copy file từ file nguồn đến file đích
@@ -717,6 +731,7 @@ namespace BMS
 						List<string> lstCount = new List<string>();
 						List<string> lstInt = new List<string>();
 						List<CInspectionData> lstcInspectionDatas = new List<CInspectionData>();
+
 						string Order1 = "";
 						string Order2 = "";
 						string Order3 = "";
@@ -725,6 +740,7 @@ namespace BMS
 							string filename = @"D:\FileUpdate\" + Path1;
 							//Tạo bảng
 							dttDao = new DataTable();
+							#region
 							//THêm cột vào bảng
 							dttDao.Columns.Add("F1");
 							dttDao.Columns.Add("F2");
@@ -891,6 +907,8 @@ namespace BMS
 							dttDao.Columns.Add("F161");
 							dttDao.Columns.Add("F162");
 							dttDao.Columns.Add("F163");
+							#endregion
+							DataTable dtOld = dttDao.Clone();
 
 							//gọi hàm đọc file txt
 							string noidung = Lib.GetFileContentTXT(filename);
@@ -909,12 +927,13 @@ namespace BMS
 								//string[] _dong = dong.Split('\t');
 								string[] _dong = dong.Split('\t');
 								OrderNew = _dong[1] + _dong[3] + _dong[7];
+								//Khi Order khác thì thêm vào bảng
 								if (OrderOld != OrderNew)
 								{
 									// add vào bảng
-									if (lstcInspectionDatas.Count > 0 && lstCode.Count > 0 && lstInt.Count > 0 && (Order1.Trim() == Order2.Trim()))
+									if (Order1.Trim() == Order2.Trim())
 									{
-										for (int i = 0; i < lstCode.Count; i++)
+										for (int i = 0; i < dtOld.Rows.Count; i++)
 										{
 											#region
 											DataRow dr1 = dttDao.NewRow();
@@ -933,219 +952,29 @@ namespace BMS
 											dr1["F13"] = _dongOld[12];
 											dr1["F14"] = _dongOld[13];
 											dr1["F15"] = _dongOld[14];
-											if (lstInt.Count < i + 1)
-											{
-												break;
-											}
-											string so = Regex.Replace(lstInt[i], ",", string.Empty).Trim();
-											dr1["F16"] = lstCode[i].Trim() + so;//Code	
+
+											string so = Regex.Replace(TextUtils.ToString(dtOld.Rows[i]["F6"]), ",", string.Empty).Trim(); //tách mã số trong code 
+											dr1["F16"] = TextUtils.ToString(dtOld.Rows[i]["F5"]) + so;//Code	
 											if (dr1["F16"].ToString().Trim() == "") continue;
-											dr1["F17"] = lstcInspectionDatas[i].Row4;//Date
-											dr1["F18"] = lstcInspectionDatas[i].Row5;//Worker
-											dr1["F19"] = lstcInspectionDatas[i].Row6;//NameLocal
 
-											dr1["F20"] = lstcInspectionDatas[i].Row10;
-											dr1["F21"] = lstcInspectionDatas[i].Row10Min;
-											dr1["F22"] = lstcInspectionDatas[i].Row10Max;
-											
-											
-											dr1["F23"] = lstcInspectionDatas[i].Row11;
-											dr1["F24"] = lstcInspectionDatas[i].Row11Min;
-											dr1["F25"] = lstcInspectionDatas[i].Row11Max;
+											dr1["F17"] = TextUtils.ToDate2(dtOld.Rows[i]["F17"]);//Date
+											dr1["F18"] = TextUtils.ToString(dtOld.Rows[i]["F18"]);
+											dr1["F19"] = TextUtils.ToString(dtOld.Rows[i]["F19"]);
 
-											dr1["F26"] = lstcInspectionDatas[i].Row12;
-											dr1["F27"] = lstcInspectionDatas[i].Row12Min;
-											dr1["F28"] = lstcInspectionDatas[i].Row12Max;
-
-											dr1["F29"] = lstcInspectionDatas[i].Row13;
-											dr1["F30"] = lstcInspectionDatas[i].Row13Min;
-											dr1["F31"] = lstcInspectionDatas[i].Row13Max;
-										
-											dr1["F32"] = lstcInspectionDatas[i].Row14;
-											dr1["F33"] = lstcInspectionDatas[i].Row14Min;
-											dr1["F34"] = lstcInspectionDatas[i].Row14Max;
-											
-											dr1["F35"] = lstcInspectionDatas[i].Row16;
-											dr1["F36"] = lstcInspectionDatas[i].Row16Min;
-											dr1["F37"] = lstcInspectionDatas[i].Row16Max;
-											
-											dr1["F38"] = lstcInspectionDatas[i].Row17;
-											dr1["F39"] = lstcInspectionDatas[i].Row17Min;
-											dr1["F40"] = lstcInspectionDatas[i].Row17Max;
-											
-											dr1["F41"] = lstcInspectionDatas[i].Row18;
-											dr1["F42"] = lstcInspectionDatas[i].Row18Min;
-											dr1["F43"] = lstcInspectionDatas[i].Row18Max;
-											
-											dr1["F44"] = lstcInspectionDatas[i].Row19;
-											dr1["F45"] = lstcInspectionDatas[i].Row19Min;
-											dr1["F46"] = lstcInspectionDatas[i].Row19Max;
-											
-											dr1["F47"] = lstcInspectionDatas[i].Row20;
-											dr1["F48"] = lstcInspectionDatas[i].Row20Min;
-											dr1["F49"] = lstcInspectionDatas[i].Row20Max;
-										
-											dr1["F50"] = lstcInspectionDatas[i].Row21;
-											dr1["F51"] = lstcInspectionDatas[i].Row21Min;
-											dr1["F52"] = lstcInspectionDatas[i].Row21Max;
-											
-											dr1["F53"] = lstcInspectionDatas[i].Row22;
-											dr1["F54"] = lstcInspectionDatas[i].Row22Min;
-											dr1["F55"] = lstcInspectionDatas[i].Row22Max;
-										
-											dr1["F56"] = lstcInspectionDatas[i].Row23;
-											dr1["F57"] = lstcInspectionDatas[i].Row23Min;
-											dr1["F58"] = lstcInspectionDatas[i].Row23Max;
-											
-											dr1["F59"] = lstcInspectionDatas[i].Row24;
-											dr1["F60"] = lstcInspectionDatas[i].Row24Min;
-											dr1["F61"] = lstcInspectionDatas[i].Row24Max;
-										
-											dr1["F62"] = lstcInspectionDatas[i].Row25;
-											dr1["F63"] = lstcInspectionDatas[i].Row25Min;
-											dr1["F64"] = lstcInspectionDatas[i].Row25Max;
-										
-											dr1["F65"] = lstcInspectionDatas[i].Row26;
-											dr1["F66"] = lstcInspectionDatas[i].Row26Min;
-											dr1["F67"] = lstcInspectionDatas[i].Row26Max;
-											
-											dr1["F68"] = lstcInspectionDatas[i].Row27;
-											dr1["F69"] = lstcInspectionDatas[i].Row27Min;
-											dr1["F70"] = lstcInspectionDatas[i].Row27Max;
-											
-											dr1["F71"] = lstcInspectionDatas[i].Row28;
-											dr1["F72"] = lstcInspectionDatas[i].Row28Min;
-											dr1["F73"] = lstcInspectionDatas[i].Row28Max;
-											
-											dr1["F74"] = lstcInspectionDatas[i].Row29;
-											dr1["F75"] = lstcInspectionDatas[i].Row29Min;
-											dr1["F76"] = lstcInspectionDatas[i].Row29Max;
-
-											dr1["F77"] = lstcInspectionDatas[i].Row30;
-											dr1["F78"] = lstcInspectionDatas[i].Row30Min;
-											dr1["F79"] = lstcInspectionDatas[i].Row30Max;
-
-											dr1["F80"] = lstcInspectionDatas[i].Row31;
-											dr1["F81"] = lstcInspectionDatas[i].Row32Min;
-											dr1["F82"] = lstcInspectionDatas[i].Row33Max;
-
-											dr1["F83"] = lstcInspectionDatas[i].Row34;
-											dr1["F84"] = lstcInspectionDatas[i].Row34Min;
-											dr1["F85"] = lstcInspectionDatas[i].Row34Max;
-
-											dr1["F86"] = lstcInspectionDatas[i].Row35;
-											dr1["F87"] = lstcInspectionDatas[i].Row35Min;
-											dr1["F88"] = lstcInspectionDatas[i].Row35Max;
-
-											dr1["F89"] = lstcInspectionDatas[i].Row36;
-											dr1["F90"] = lstcInspectionDatas[i].Row36Min;
-											dr1["F91"] = lstcInspectionDatas[i].Row36Max;
-
-											dr1["F92"] = lstcInspectionDatas[i].Row37;
-											dr1["F93"] = lstcInspectionDatas[i].Row37Min;
-											dr1["F94"] = lstcInspectionDatas[i].Row37Max;
-
-											dr1["F95"] = lstcInspectionDatas[i].Row38;
-											dr1["F96"] = lstcInspectionDatas[i].Row38Min;
-											dr1["F97"] = lstcInspectionDatas[i].Row38Max;
-
-											dr1["F98"] = lstcInspectionDatas[i].Row39;
-											dr1["F99"] = lstcInspectionDatas[i].Row39Min;
-											dr1["F100"] = lstcInspectionDatas[i].Row39Max;
-
-											dr1["F101"] = lstcInspectionDatas[i].Row40;
-											dr1["F102"] = lstcInspectionDatas[i].Row40Min;
-											dr1["F103"] = lstcInspectionDatas[i].Row40Max;
-
-											dr1["F104"] = lstcInspectionDatas[i].Row41;
-											dr1["F105"] = lstcInspectionDatas[i].Row41Min;
-											dr1["F106"] = lstcInspectionDatas[i].Row41Max;
-
-											dr1["F107"] = lstcInspectionDatas[i].Row42;
-											dr1["F108"] = lstcInspectionDatas[i].Row42Min;
-											dr1["F109"] = lstcInspectionDatas[i].Row42Max;
-
-											dr1["F110"] = lstcInspectionDatas[i].Row43;
-											dr1["F111"] = lstcInspectionDatas[i].Row43Min;
-											dr1["F112"] = lstcInspectionDatas[i].Row43Max;
-
-											dr1["F113"] = lstcInspectionDatas[i].Row44;
-											dr1["F114"] = lstcInspectionDatas[i].Row44Min;
-											dr1["F115"] = lstcInspectionDatas[i].Row44Max;
-
-											dr1["F116"] = lstcInspectionDatas[i].Row45;
-											dr1["F117"] = lstcInspectionDatas[i].Row45Min;
-											dr1["F118"] = lstcInspectionDatas[i].Row45Max;
-
-											dr1["F119"] = lstcInspectionDatas[i].Row46;
-											dr1["F120"] = lstcInspectionDatas[i].Row46Min;
-											dr1["F121"] = lstcInspectionDatas[i].Row46Max;
-
-											dr1["F122"] = lstcInspectionDatas[i].Row47;
-											dr1["F123"] = lstcInspectionDatas[i].Row47Min;
-											dr1["F124"] = lstcInspectionDatas[i].Row47Max;
-
-											dr1["F125"] = lstcInspectionDatas[i].Row48;
-											dr1["F126"] = lstcInspectionDatas[i].Row48Min;
-											dr1["F127"] = lstcInspectionDatas[i].Row48Max;
-
-											dr1["F128"] = lstcInspectionDatas[i].Row49;
-											dr1["F129"] = lstcInspectionDatas[i].Row49Min;
-											dr1["F130"] = lstcInspectionDatas[i].Row49Max;
-
-											dr1["F131"] = lstcInspectionDatas[i].Row50;
-											dr1["F132"] = lstcInspectionDatas[i].Row50Min;
-											dr1["F133"] = lstcInspectionDatas[i].Row50Max;
-
-											dr1["F134"] = lstcInspectionDatas[i].Row51;
-											dr1["F135"] = lstcInspectionDatas[i].Row51Min;
-											dr1["F136"] = lstcInspectionDatas[i].Row51Max;
-
-											dr1["F137"] = lstcInspectionDatas[i].Row52;
-											dr1["F138"] = lstcInspectionDatas[i].Row52Min;
-											dr1["F139"] = lstcInspectionDatas[i].Row52Max;
-
-											dr1["F140"] = lstcInspectionDatas[i].Row53;
-											dr1["F141"] = lstcInspectionDatas[i].Row53Min;
-											dr1["F142"] = lstcInspectionDatas[i].Row53Max;
-
-											dr1["F143"] = lstcInspectionDatas[i].Row54;
-											dr1["F144"] = lstcInspectionDatas[i].Row54Min;
-											dr1["F145"] = lstcInspectionDatas[i].Row54Max;
-
-											dr1["F146"] = lstcInspectionDatas[i].Row55;
-											dr1["F147"] = lstcInspectionDatas[i].Row55Min;
-											dr1["F148"] = lstcInspectionDatas[i].Row55Max;
-
-											dr1["F149"] = lstcInspectionDatas[i].Row56;
-											dr1["F150"] = lstcInspectionDatas[i].Row56Min;
-											dr1["F151"] = lstcInspectionDatas[i].Row56Max;
-
-											dr1["F152"] = lstcInspectionDatas[i].Row57;
-											dr1["F153"] = lstcInspectionDatas[i].Row57Min;
-											dr1["F154"] = lstcInspectionDatas[i].Row57Max;
-
-											dr1["F155"] = lstcInspectionDatas[i].Row58;
-											dr1["F156"] = lstcInspectionDatas[i].Row58Min;
-											dr1["F157"] = lstcInspectionDatas[i].Row58Max;
-
-											dr1["F158"] = lstcInspectionDatas[i].Row59;
-											dr1["F159"] = lstcInspectionDatas[i].Row59Min;
-											dr1["F160"] = lstcInspectionDatas[i].Row59Max;
-
-											dr1["F161"] = lstcInspectionDatas[i].Row60;
-											dr1["F162"] = lstcInspectionDatas[i].Row60Min;
-											dr1["F163"] = lstcInspectionDatas[i].Row60Max;
+											//dr1["F17"] = lstcInspectionDatas[i].Row4;//Date
+											//dr1["F18"] = lstcInspectionDatas[i].Row5;//Worker
+											//dr1["F19"] = lstcInspectionDatas[i].Row6;//NameLocal
+											for (int j = 20; j < dtOld.Columns.Count; j++)
+											{
+												dr1[$"F{j}"] = TextUtils.ToString(dtOld.Rows[i][$"F{j}"]);
+											}
 											#endregion
 											dttDao.Rows.Add(dr1);
 										}
+										dtOld.Clear();
 									}
 									OrderOld = OrderNew;
 									_dongOld = _dong;
-
-									lstCode.Clear();
-									lstInt.Clear();
-									lstcInspectionDatas.Clear();
 									Order1 = "";
 									Order2 = "";
 								}
@@ -1160,26 +989,75 @@ namespace BMS
 
 									if (TextUtils.ToInt(_dong[6]) == 1)
 									{
-										if (lstCode.Count > 0)
+										try
 										{
-											lstCode.Clear();
+											Order1 = _dong[1];
+											for (int i = 0; i < AddDong.Count(); i++)
+											{
+												DataRow dataRow = dtOld.NewRow();
+												for (int j = 0; j < dttDao.Columns.Count; j++)
+												{
+													dataRow[dttDao.Columns[j].Caption] = "";
+												}
+												dataRow["F5"] = AddDong[i]; //mã code
+												dtOld.Rows.Add(dataRow);
+												//lstCode.Add(AddDong[i]);
+											}
 										}
-										Order1 = _dong[1];
-										for (int i = 0; i < AddDong.Count(); i++)
+										catch (Exception ex)
 										{
-											lstCode.Add(AddDong[i]);
+											try
+											{
+												//Copy file Save vào thư mục 
+												string sourcePath = btnBrowseDao.Text;
+												string[] PathSplit = btnBrowseDao.Text.Trim().Split('\\');
+												string PathError = PathSplit[PathSplit.Length - 1];
+												//Đường dẫn file Update
+												string sourceFile = System.IO.Path.Combine(sourcePath);
+												string destFile = System.IO.Path.Combine(targetPathError, "InsertDao" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
+												//Copy file từ file nguồn đến file đích
+												System.IO.File.Copy(sourceFile, destFile, true);
+
+												//ErrorLog.errorLog("Lỗi file Update Dao", $"{ex}", Environment.NewLine);
+											}
+											catch
+											{
+
+											}
 										}
+
 									}
 									else if (TextUtils.ToInt(_dong[6]) == 2)
 									{
-										if (lstInt.Count > 0)
+										try
 										{
-											lstInt.Clear();
+											Order2 = _dong[1];
+											for (int i = 0; i < AddDong.Count(); i++)
+											{
+												dtOld.Rows[i]["F6"] = AddDong[i];//giá trị số trong code
+																				 //lstInt.Add(AddDong[i]);
+											}
 										}
-										Order2 = _dong[1];
-										for (int i = 0; i < AddDong.Count(); i++)
+										catch (Exception ex)
 										{
-											lstInt.Add(AddDong[i]);
+											try
+											{
+												//Copy file Save vào thư mục 
+												string sourcePath = btnBrowseDao.Text;
+												string[] PathSplit = btnBrowseDao.Text.Trim().Split('\\');
+												string PathError = PathSplit[PathSplit.Length - 1];
+												//Đường dẫn file Update
+												string sourceFile = System.IO.Path.Combine(sourcePath);
+												string destFile = System.IO.Path.Combine(targetPathError, "InsertDao" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
+												//Copy file từ file nguồn đến file đích
+												System.IO.File.Copy(sourceFile, destFile, true);
+
+												//ErrorLog.errorLog("Lỗi file Update Dao", $"{ex}", Environment.NewLine);
+											}
+											catch
+											{
+
+											}
 										}
 									}
 								}
@@ -1187,338 +1065,77 @@ namespace BMS
 								//18 giá trị được lưu Max;Min;Giá trị
 								for (int i = 0; i < AddDong.Count(); i++)
 								{
-									CInspectionData cInspectionData = new CInspectionData();
-									if (lstcInspectionDatas.Count <= i + 1)
-										lstcInspectionDatas.Add(cInspectionData);
+									if (dtOld.Rows.Count <= i) continue;
+									//Lấy số thứ tự để Add vào từng list
 									switch (TextUtils.ToInt(_dong[6]))
 									{
 										#region
+										case 0:
+											//dtOld.Rows[i][$"F"]
+											//lstcInspectionDatas[i].Row1 = AddDong[i];
+											break;
 										case 1:
-											lstcInspectionDatas[i].Row1 = AddDong[i];
+											//dtOld.Rows[i][$"F"]
+											//lstcInspectionDatas[i].Row1 = AddDong[i];
 											break;
 										case 2:
-											lstcInspectionDatas[i].Row2 = AddDong[i];
+											//dtOld.Rows[i][$"F{j}"]
+											//lstcInspectionDatas[i].Row2 = AddDong[i];
+											break;
+										case 3:
+											//dtOld.Rows[i][$"F{j}"]
+											//lstcInspectionDatas[i].Row2 = AddDong[i];
 											break;
 										case 4:
-											lstcInspectionDatas[i].Row4 = AddDong[i];
+											//dtOld.Rows[i][$"F{j}"]
+											//lstcInspectionDatas[i].Row4 = AddDong[i];
 											break;
 										case 5:
-											lstcInspectionDatas[i].Row5 = AddDong[i];
+											dtOld.Rows[i][$"F18"] = AddDong[i];
+											//lstcInspectionDatas[i].Row5 = AddDong[i];
 											break;
 										case 6:
-											lstcInspectionDatas[i].Row6 = AddDong[i];
+											dtOld.Rows[i][$"F19"] = AddDong[i];
+											//lstcInspectionDatas[i].Row6 = AddDong[i];
+											break;
+										case 7:
+											//dtOld.Rows[i][$"F"]
+											//lstcInspectionDatas[i].Row1 = AddDong[i];
+											break;
+										case 8:
+											//dtOld.Rows[i][$"F"]
+											//lstcInspectionDatas[i].Row1 = AddDong[i];
+											break;
+										case 9:
+											//dtOld.Rows[i][$"F"]
+											//lstcInspectionDatas[i].Row1 = AddDong[i];
 											break;
 										//case 7:
 										//	lstcInspectionDatas[i].Row7 = AddDong[i];
 										//	break;
-										case 10:
-											lstcInspectionDatas[i].Row10 = AddDong[i];
-											lstcInspectionDatas[i].Row10Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row10Min = $"{_dong[12]}";
-											break;
-										case 11:
-											lstcInspectionDatas[i].Row11 = AddDong[i];
-											lstcInspectionDatas[i].Row11Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row11Min = $"{_dong[12]}";
 
+										default:
+											for (int j = 20; j < dtOld.Columns.Count; j++)
+											{
+												if (TextUtils.ToString(dtOld.Rows[i][$"F{j}"]).Trim() == "")
+												{
+													dtOld.Rows[i][$"F{j}"] = AddDong[i];
+													dtOld.Rows[i][$"F{j + 1}"] = $"{_dong[11]}";
+													dtOld.Rows[i][$"F{j + 2}"] = $"{_dong[12]}";
+													break;
+												}
+											}
 											break;
-										case 12:
-											lstcInspectionDatas[i].Row12 = AddDong[i];
-											lstcInspectionDatas[i].Row12Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row12Min = $"{_dong[12]}";
 
-											break;
-										case 13:
-											lstcInspectionDatas[i].Row13 = AddDong[i];
-											lstcInspectionDatas[i].Row13Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row13Min = $"{_dong[12]}";
-
-											break;
-										case 14:
-											lstcInspectionDatas[i].Row14 = AddDong[i];
-											lstcInspectionDatas[i].Row14Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row14Min = $"{_dong[12]}";
-
-											break;
-										case 15:
-											lstcInspectionDatas[i].Row15 = AddDong[i];
-											lstcInspectionDatas[i].Row15Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row15Min = $"{_dong[12]}";
-
-											break;
-										case 16:
-											lstcInspectionDatas[i].Row16 = AddDong[i];
-											lstcInspectionDatas[i].Row16Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row16Min = $"{_dong[12]}";
-
-											break;
-										case 17:
-											lstcInspectionDatas[i].Row17 = AddDong[i];
-											lstcInspectionDatas[i].Row17Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row17Min = $"{_dong[12]}";
-
-											break;
-										case 18:
-											lstcInspectionDatas[i].Row18 = AddDong[i];
-											lstcInspectionDatas[i].Row18Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row18Min = $"{_dong[12]}";
-
-											break;
-										case 19:
-											lstcInspectionDatas[i].Row19 = AddDong[i];
-											lstcInspectionDatas[i].Row19Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row19Min = $"{_dong[12]}";
-
-											break;
-										case 20:
-											lstcInspectionDatas[i].Row20 = AddDong[i];
-											lstcInspectionDatas[i].Row20Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row20Min = $"{_dong[12]}";
-
-											break;
-										case 21:
-											lstcInspectionDatas[i].Row21 = AddDong[i];
-											lstcInspectionDatas[i].Row21Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row21Min = $"{_dong[12]}";
-
-											break;
-										case 22:
-											lstcInspectionDatas[i].Row22 = AddDong[i];
-											lstcInspectionDatas[i].Row22Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row22Min = $"{_dong[12]}";
-
-											break;
-										case 23:
-											lstcInspectionDatas[i].Row23 = AddDong[i];
-											lstcInspectionDatas[i].Row23Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row23Min = $"{_dong[12]}";
-
-											break;
-										case 24:
-											lstcInspectionDatas[i].Row24 = AddDong[i];
-											lstcInspectionDatas[i].Row24Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row24Min = $"{_dong[12]}";
-
-											break;
-										case 25:
-											lstcInspectionDatas[i].Row25 = AddDong[i];
-											lstcInspectionDatas[i].Row25Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row25Min = $"{_dong[12]}";
-
-											break;
-										case 26:
-											lstcInspectionDatas[i].Row26 = AddDong[i];
-											lstcInspectionDatas[i].Row26Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row26Min = $"{_dong[12]}";
-
-											break;
-										case 27:
-											lstcInspectionDatas[i].Row27 = AddDong[i];
-											lstcInspectionDatas[i].Row27Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row27Min = $"{_dong[12]}";
-
-											break;
-										case 28:
-											lstcInspectionDatas[i].Row28 = AddDong[i];
-											lstcInspectionDatas[i].Row28Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row28Min = $"{_dong[12]}";
-
-											break;
-										case 29:
-											lstcInspectionDatas[i].Row29 = AddDong[i];
-											lstcInspectionDatas[i].Row29Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row29Min = $"{_dong[12]}";
-
-											break;
-										case 30:
-											lstcInspectionDatas[i].Row30 = AddDong[i];
-											lstcInspectionDatas[i].Row30Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row30Min = $"{_dong[12]}";
-
-											break;
-										case 31:
-											lstcInspectionDatas[i].Row31 = AddDong[i];
-											lstcInspectionDatas[i].Row31Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row31Min = $"{_dong[12]}";
-
-											break;
-										case 32:
-											lstcInspectionDatas[i].Row32 = AddDong[i];
-											lstcInspectionDatas[i].Row32Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row32Min = $"{_dong[12]}";
-
-											break;
-										case 33:
-											lstcInspectionDatas[i].Row33 = AddDong[i];
-											lstcInspectionDatas[i].Row33Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row33Min = $"{_dong[12]}";
-
-											break;
-										case 34:
-											lstcInspectionDatas[i].Row34 = AddDong[i];
-											lstcInspectionDatas[i].Row34Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row34Min = $"{_dong[12]}";
-
-											break;
-										case 35:
-											lstcInspectionDatas[i].Row35 = AddDong[i];
-											lstcInspectionDatas[i].Row35Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row35Min = $"{_dong[12]}";
-
-											break;
-										case 36:
-											lstcInspectionDatas[i].Row36 = AddDong[i];
-											lstcInspectionDatas[i].Row36Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row36Min = $"{_dong[12]}";
-
-											break;
-										case 37:
-											lstcInspectionDatas[i].Row37 = AddDong[i];
-											lstcInspectionDatas[i].Row37Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row37Min = $"{_dong[12]}";
-
-											break;
-										case 38:
-											lstcInspectionDatas[i].Row38 = AddDong[i];
-											lstcInspectionDatas[i].Row38Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row38Min = $"{_dong[12]}";
-
-											break;
-										case 39:
-											lstcInspectionDatas[i].Row39 = AddDong[i];
-											lstcInspectionDatas[i].Row39Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row39Min = $"{_dong[12]}";
-
-											break;
-										case 40:
-											lstcInspectionDatas[i].Row40 = AddDong[i];
-											lstcInspectionDatas[i].Row40Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row40Min = $"{_dong[12]}";
-											break;
-										case 41:
-											lstcInspectionDatas[i].Row41 = AddDong[i];
-											lstcInspectionDatas[i].Row41Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row41Min = $"{_dong[12]}";
-
-											break;
-										case 42:
-											lstcInspectionDatas[i].Row42 = AddDong[i];
-											lstcInspectionDatas[i].Row42Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row42Min = $"{_dong[12]}";
-
-											break;
-										case 43:
-											lstcInspectionDatas[i].Row43 = AddDong[i];
-											lstcInspectionDatas[i].Row43Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row43Min = $"{_dong[12]}";
-
-											break;
-										case 44:
-											lstcInspectionDatas[i].Row44 = AddDong[i];
-											lstcInspectionDatas[i].Row44Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row44Min = $"{_dong[12]}";
-
-											break;
-										case 45:
-											lstcInspectionDatas[i].Row45 = AddDong[i];
-											lstcInspectionDatas[i].Row45Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row45Min = $"{_dong[12]}";
-
-											break;
-										case 46:
-											lstcInspectionDatas[i].Row46 = AddDong[i];
-											lstcInspectionDatas[i].Row46Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row46Min = $"{_dong[12]}";
-
-											break;
-										case 47:
-											lstcInspectionDatas[i].Row47 = AddDong[i];
-											lstcInspectionDatas[i].Row47Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row47Min = $"{_dong[12]}";
-
-											break;
-										case 48:
-											lstcInspectionDatas[i].Row48 = AddDong[i];
-											lstcInspectionDatas[i].Row48Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row48Min = $"{_dong[12]}";
-
-											break;
-										case 49:
-											lstcInspectionDatas[i].Row49 = AddDong[i];
-											lstcInspectionDatas[i].Row49Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row49Min = $"{_dong[12]}";
-
-											break;
-										case 50:
-											lstcInspectionDatas[i].Row50 = AddDong[i];
-											lstcInspectionDatas[i].Row50Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row50Min = $"{_dong[12]}";
-
-											break;
-										case 51:
-											lstcInspectionDatas[i].Row51 = AddDong[i];
-											lstcInspectionDatas[i].Row51Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row51Min = $"{_dong[12]}";
-
-											break;
-										case 52:
-											lstcInspectionDatas[i].Row52 = AddDong[i];
-											lstcInspectionDatas[i].Row52Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row52Min = $"{_dong[12]}";
-
-											break;
-										case 53:
-											lstcInspectionDatas[i].Row53 = AddDong[i];
-											lstcInspectionDatas[i].Row53Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row53Min = $"{_dong[12]}";
-
-											break;
-										case 54:
-											lstcInspectionDatas[i].Row54 = AddDong[i];
-											lstcInspectionDatas[i].Row54Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row54Min = $"{_dong[12]}";
-
-											break;
-										case 55:
-											lstcInspectionDatas[i].Row55 = AddDong[i];
-											lstcInspectionDatas[i].Row55Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row55Min = $"{_dong[12]}";
-
-											break;
-										case 56:
-											lstcInspectionDatas[i].Row56 = AddDong[i];
-											lstcInspectionDatas[i].Row56Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row56Min = $"{_dong[12]}";
-
-											break;
-										case 57:
-											lstcInspectionDatas[i].Row57 = AddDong[i];
-											lstcInspectionDatas[i].Row57Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row57Min = $"{_dong[12]}";
-											break;
-										case 58:
-											lstcInspectionDatas[i].Row58 = AddDong[i];
-											lstcInspectionDatas[i].Row58Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row58Min = $"{_dong[12]}";
-											break;
-										case 59:
-											lstcInspectionDatas[i].Row59 = AddDong[i];
-											lstcInspectionDatas[i].Row59Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row59Min = $"{_dong[12]}";
-											break;
-										case 60:
-											lstcInspectionDatas[i].Row60 = AddDong[i];
-											lstcInspectionDatas[i].Row60Max = $"{_dong[11]}";
-											lstcInspectionDatas[i].Row60Min = $"{_dong[12]}";
-											break;
 											#endregion
 									}
 								}
-
+								//dtOld.Rows.Add();
 							}
-							if (lstcInspectionDatas.Count > 0 && lstCode.Count > 0 && lstInt.Count > 0 && (Order1.Trim() == Order2.Trim()))
+							//Add vào giá trị cuối cùng vào bảng 
+							if (dtOld.Rows.Count > 0 && Order1.Trim() == Order2.Trim())
 							{
-								for (int i = 0; i < lstCode.Count; i++)
+								for (int i = 0; i < dtOld.Rows.Count; i++)
 								{
 									DataRow dr1 = dttDao.NewRow();
 									dr1["F1"] = _dongOld[0];//Br
@@ -1536,219 +1153,22 @@ namespace BMS
 									dr1["F13"] = _dongOld[12];
 									dr1["F14"] = _dongOld[13];
 									dr1["F15"] = _dongOld[14];
-									if (lstInt.Count < i + 1)
-									{
-										break;
-									}
-									string so = Regex.Replace(lstInt[i], ",", string.Empty).Trim();
-									dr1["F16"] = lstCode[i].Trim() + so;//Code	
+
+									string so = Regex.Replace(TextUtils.ToString(dtOld.Rows[i]["F6"]), ",", string.Empty).Trim(); //tách mã số trong code 
+									dr1["F16"] = TextUtils.ToString(dtOld.Rows[i]["F5"]) + so;//Code	
 									if (dr1["F16"].ToString().Trim() == "") continue;
-									#region
-									dr1["F17"] = lstcInspectionDatas[i].Row4;//Date
-									dr1["F18"] = lstcInspectionDatas[i].Row5;//Worker
-									dr1["F19"] = lstcInspectionDatas[i].Row6;//NameLocal
-
-									dr1["F20"] = lstcInspectionDatas[i].Row10;
-									dr1["F21"] = lstcInspectionDatas[i].Row10Min;
-									dr1["F22"] = lstcInspectionDatas[i].Row10Max;
-
-
-									dr1["F23"] = lstcInspectionDatas[i].Row11;
-									dr1["F24"] = lstcInspectionDatas[i].Row11Min;
-									dr1["F25"] = lstcInspectionDatas[i].Row11Max;
-
-									dr1["F26"] = lstcInspectionDatas[i].Row12;
-									dr1["F27"] = lstcInspectionDatas[i].Row12Min;
-									dr1["F28"] = lstcInspectionDatas[i].Row12Max;
-
-									dr1["F29"] = lstcInspectionDatas[i].Row13;
-									dr1["F30"] = lstcInspectionDatas[i].Row13Min;
-									dr1["F31"] = lstcInspectionDatas[i].Row13Max;
-
-									dr1["F32"] = lstcInspectionDatas[i].Row14;
-									dr1["F33"] = lstcInspectionDatas[i].Row14Min;
-									dr1["F34"] = lstcInspectionDatas[i].Row14Max;
-
-									dr1["F35"] = lstcInspectionDatas[i].Row16;
-									dr1["F36"] = lstcInspectionDatas[i].Row16Min;
-									dr1["F37"] = lstcInspectionDatas[i].Row16Max;
-
-									dr1["F38"] = lstcInspectionDatas[i].Row17;
-									dr1["F39"] = lstcInspectionDatas[i].Row17Min;
-									dr1["F40"] = lstcInspectionDatas[i].Row17Max;
-
-									dr1["F41"] = lstcInspectionDatas[i].Row18;
-									dr1["F42"] = lstcInspectionDatas[i].Row18Min;
-									dr1["F43"] = lstcInspectionDatas[i].Row18Max;
-
-									dr1["F44"] = lstcInspectionDatas[i].Row19;
-									dr1["F45"] = lstcInspectionDatas[i].Row19Min;
-									dr1["F46"] = lstcInspectionDatas[i].Row19Max;
-
-									dr1["F47"] = lstcInspectionDatas[i].Row20;
-									dr1["F48"] = lstcInspectionDatas[i].Row20Min;
-									dr1["F49"] = lstcInspectionDatas[i].Row20Max;
-
-									dr1["F50"] = lstcInspectionDatas[i].Row21;
-									dr1["F51"] = lstcInspectionDatas[i].Row21Min;
-									dr1["F52"] = lstcInspectionDatas[i].Row21Max;
-
-									dr1["F53"] = lstcInspectionDatas[i].Row22;
-									dr1["F54"] = lstcInspectionDatas[i].Row22Min;
-									dr1["F55"] = lstcInspectionDatas[i].Row22Max;
-
-									dr1["F56"] = lstcInspectionDatas[i].Row23;
-									dr1["F57"] = lstcInspectionDatas[i].Row23Min;
-									dr1["F58"] = lstcInspectionDatas[i].Row23Max;
-
-									dr1["F59"] = lstcInspectionDatas[i].Row24;
-									dr1["F60"] = lstcInspectionDatas[i].Row24Min;
-									dr1["F61"] = lstcInspectionDatas[i].Row24Max;
-
-									dr1["F62"] = lstcInspectionDatas[i].Row25;
-									dr1["F63"] = lstcInspectionDatas[i].Row25Min;
-									dr1["F64"] = lstcInspectionDatas[i].Row25Max;
-
-									dr1["F65"] = lstcInspectionDatas[i].Row26;
-									dr1["F66"] = lstcInspectionDatas[i].Row26Min;
-									dr1["F67"] = lstcInspectionDatas[i].Row26Max;
-
-									dr1["F68"] = lstcInspectionDatas[i].Row27;
-									dr1["F69"] = lstcInspectionDatas[i].Row27Min;
-									dr1["F70"] = lstcInspectionDatas[i].Row27Max;
-
-									dr1["F71"] = lstcInspectionDatas[i].Row28;
-									dr1["F72"] = lstcInspectionDatas[i].Row28Min;
-									dr1["F73"] = lstcInspectionDatas[i].Row28Max;
-
-									dr1["F74"] = lstcInspectionDatas[i].Row29;
-									dr1["F75"] = lstcInspectionDatas[i].Row29Min;
-									dr1["F76"] = lstcInspectionDatas[i].Row29Max;
-
-									dr1["F77"] = lstcInspectionDatas[i].Row30;
-									dr1["F78"] = lstcInspectionDatas[i].Row30Min;
-									dr1["F79"] = lstcInspectionDatas[i].Row30Max;
-
-									dr1["F80"] = lstcInspectionDatas[i].Row31;
-									dr1["F81"] = lstcInspectionDatas[i].Row32Min;
-									dr1["F82"] = lstcInspectionDatas[i].Row33Max;
-
-									dr1["F83"] = lstcInspectionDatas[i].Row34;
-									dr1["F84"] = lstcInspectionDatas[i].Row34Min;
-									dr1["F85"] = lstcInspectionDatas[i].Row34Max;
-
-									dr1["F86"] = lstcInspectionDatas[i].Row35;
-									dr1["F87"] = lstcInspectionDatas[i].Row35Min;
-									dr1["F88"] = lstcInspectionDatas[i].Row35Max;
-
-									dr1["F89"] = lstcInspectionDatas[i].Row36;
-									dr1["F90"] = lstcInspectionDatas[i].Row36Min;
-									dr1["F91"] = lstcInspectionDatas[i].Row36Max;
-
-									dr1["F92"] = lstcInspectionDatas[i].Row37;
-									dr1["F93"] = lstcInspectionDatas[i].Row37Min;
-									dr1["F94"] = lstcInspectionDatas[i].Row37Max;
-
-									dr1["F95"] = lstcInspectionDatas[i].Row38;
-									dr1["F96"] = lstcInspectionDatas[i].Row38Min;
-									dr1["F97"] = lstcInspectionDatas[i].Row38Max;
-
-									dr1["F98"] = lstcInspectionDatas[i].Row39;
-									dr1["F99"] = lstcInspectionDatas[i].Row39Min;
-									dr1["F100"] = lstcInspectionDatas[i].Row39Max;
-
-									dr1["F101"] = lstcInspectionDatas[i].Row40;
-									dr1["F102"] = lstcInspectionDatas[i].Row40Min;
-									dr1["F103"] = lstcInspectionDatas[i].Row40Max;
-
-									dr1["F104"] = lstcInspectionDatas[i].Row41;
-									dr1["F105"] = lstcInspectionDatas[i].Row41Min;
-									dr1["F106"] = lstcInspectionDatas[i].Row41Max;
-
-									dr1["F107"] = lstcInspectionDatas[i].Row42;
-									dr1["F108"] = lstcInspectionDatas[i].Row42Min;
-									dr1["F109"] = lstcInspectionDatas[i].Row42Max;
-
-									dr1["F110"] = lstcInspectionDatas[i].Row43;
-									dr1["F111"] = lstcInspectionDatas[i].Row43Min;
-									dr1["F112"] = lstcInspectionDatas[i].Row43Max;
-
-									dr1["F113"] = lstcInspectionDatas[i].Row44;
-									dr1["F114"] = lstcInspectionDatas[i].Row44Min;
-									dr1["F115"] = lstcInspectionDatas[i].Row44Max;
-
-									dr1["F116"] = lstcInspectionDatas[i].Row45;
-									dr1["F117"] = lstcInspectionDatas[i].Row45Min;
-									dr1["F118"] = lstcInspectionDatas[i].Row45Max;
-
-									dr1["F119"] = lstcInspectionDatas[i].Row46;
-									dr1["F120"] = lstcInspectionDatas[i].Row46Min;
-									dr1["F121"] = lstcInspectionDatas[i].Row46Max;
-
-									dr1["F122"] = lstcInspectionDatas[i].Row47;
-									dr1["F123"] = lstcInspectionDatas[i].Row47Min;
-									dr1["F124"] = lstcInspectionDatas[i].Row47Max;
-
-									dr1["F125"] = lstcInspectionDatas[i].Row48;
-									dr1["F126"] = lstcInspectionDatas[i].Row48Min;
-									dr1["F127"] = lstcInspectionDatas[i].Row48Max;
-
-									dr1["F128"] = lstcInspectionDatas[i].Row49;
-									dr1["F129"] = lstcInspectionDatas[i].Row49Min;
-									dr1["F130"] = lstcInspectionDatas[i].Row49Max;
-
-									dr1["F131"] = lstcInspectionDatas[i].Row50;
-									dr1["F132"] = lstcInspectionDatas[i].Row50Min;
-									dr1["F133"] = lstcInspectionDatas[i].Row50Max;
-
-									dr1["F134"] = lstcInspectionDatas[i].Row51;
-									dr1["F135"] = lstcInspectionDatas[i].Row51Min;
-									dr1["F136"] = lstcInspectionDatas[i].Row51Max;
-
-									dr1["F137"] = lstcInspectionDatas[i].Row52;
-									dr1["F138"] = lstcInspectionDatas[i].Row52Min;
-									dr1["F139"] = lstcInspectionDatas[i].Row52Max;
-
-									dr1["F140"] = lstcInspectionDatas[i].Row53;
-									dr1["F141"] = lstcInspectionDatas[i].Row53Min;
-									dr1["F142"] = lstcInspectionDatas[i].Row53Max;
-
-									dr1["F143"] = lstcInspectionDatas[i].Row54;
-									dr1["F144"] = lstcInspectionDatas[i].Row54Min;
-									dr1["F145"] = lstcInspectionDatas[i].Row54Max;
-
-									dr1["F146"] = lstcInspectionDatas[i].Row55;
-									dr1["F147"] = lstcInspectionDatas[i].Row55Min;
-									dr1["F148"] = lstcInspectionDatas[i].Row55Max;
-
-									dr1["F149"] = lstcInspectionDatas[i].Row56;
-									dr1["F150"] = lstcInspectionDatas[i].Row56Min;
-									dr1["F151"] = lstcInspectionDatas[i].Row56Max;
-
-									dr1["F152"] = lstcInspectionDatas[i].Row57;
-									dr1["F153"] = lstcInspectionDatas[i].Row57Min;
-									dr1["F154"] = lstcInspectionDatas[i].Row57Max;
-
-									dr1["F155"] = lstcInspectionDatas[i].Row58;
-									dr1["F156"] = lstcInspectionDatas[i].Row58Min;
-									dr1["F157"] = lstcInspectionDatas[i].Row58Max;
-
-									dr1["F158"] = lstcInspectionDatas[i].Row59;
-									dr1["F159"] = lstcInspectionDatas[i].Row59Min;
-									dr1["F160"] = lstcInspectionDatas[i].Row59Max;
-
-									dr1["F161"] = lstcInspectionDatas[i].Row60;
-									dr1["F162"] = lstcInspectionDatas[i].Row60Min;
-									dr1["F163"] = lstcInspectionDatas[i].Row60Max;
-									#endregion
-
-
+									dr1["F17"] = TextUtils.ToString(dtOld.Rows[i]["F17"]);//Date
+									dr1["F18"] = TextUtils.ToString(dtOld.Rows[i]["F18"]);
+									dr1["F19"] = TextUtils.ToString(dtOld.Rows[i]["F19"]);
+									for (int j = 20; j < dtOld.Columns.Count; j++)
+									{
+										dr1[$"F{j}"] = TextUtils.ToString(dtOld.Rows[i][$"F{j}"]);
+									}
 									dttDao.Rows.Add(dr1);
+
 								}
+								dtOld.Clear();
 								OrderOld = OrderNew;
-								lstCode.Clear();
-								lstInt.Clear();
-								lstcInspectionDatas.Clear();
 								Order1 = "";
 								Order2 = "";
 							}
@@ -1761,6 +1181,23 @@ namespace BMS
 				}
 				catch (Exception ex)
 				{
+					try
+					{
+						//Copy file Save vào thư mục 
+						string sourcePath = btnBrowseDao.Text;
+						string[] PathSplit = btnBrowseDao.Text.Trim().Split('\\');
+						string PathError = PathSplit[PathSplit.Length - 1];
+						//Đường dẫn file Update
+						string sourceFile = System.IO.Path.Combine(sourcePath);
+						string destFile = System.IO.Path.Combine(targetPathError, "InsertDao" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
+						//Copy file từ file nguồn đến file đích
+						System.IO.File.Copy(sourceFile, destFile, true);
+					//	ErrorLog.errorLog("Lỗi file Update Dao", $"{ex}", Environment.NewLine);
+					}
+					catch
+					{
+
+					}
 					dateTimeOldpathDao = DateTime.Now;
 					_startDao = 1;
 				}
@@ -1792,203 +1229,203 @@ namespace BMS
 						productKnifeModel.Quantity = Lib.ToInt(dttDao.Rows[i]["F11"]);//SỐ lượng
 						productKnifeModel.Worker = Lib.ToString(dttDao.Rows[i]["F18"]);// Tên người làm
 						productKnifeModel.NameLocal = Lib.ToString(dttDao.Rows[i]["F19"]);// Tên máy
-						
+
 						productKnifeModel.RealValue = Lib.ToString(dttDao.Rows[i]["F20"]);// Giá trị thực tế 1
 						productKnifeModel.RealValueMin = Lib.ToString(dttDao.Rows[i]["F21"]);// Giá trị thực tế 1
 						productKnifeModel.RealValueMax = Lib.ToString(dttDao.Rows[i]["F22"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue1 = Lib.ToString(dttDao.Rows[i]["F23"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue1Min = Lib.ToString(dttDao.Rows[i]["F24"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue1Max = Lib.ToString(dttDao.Rows[i]["F25"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue2 = Lib.ToString(dttDao.Rows[i]["F26"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue2Min = Lib.ToString(dttDao.Rows[i]["F27"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue2Max = Lib.ToString(dttDao.Rows[i]["F28"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue3 = Lib.ToString(dttDao.Rows[i]["F29"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue3Min = Lib.ToString(dttDao.Rows[i]["F30"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue3Max = Lib.ToString(dttDao.Rows[i]["F31"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue4 = Lib.ToString(dttDao.Rows[i]["F32"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue4Min = Lib.ToString(dttDao.Rows[i]["F33"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue4Max = Lib.ToString(dttDao.Rows[i]["F34"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue5 = Lib.ToString(dttDao.Rows[i]["F35"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue5Min = Lib.ToString(dttDao.Rows[i]["F36"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue5Max = Lib.ToString(dttDao.Rows[i]["F37"]);// Giá trị thực tế 1
-						
+
 						productKnifeModel.RealValue6 = Lib.ToString(dttDao.Rows[i]["F38"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue6Min = Lib.ToString(dttDao.Rows[i]["F39"]);// Giá trị thực tế 1
 						productKnifeModel.RealValue6Max = Lib.ToString(dttDao.Rows[i]["F40"]);
-						
+
 						productKnifeModel.RealValue7 = Lib.ToString(dttDao.Rows[i]["F41"]);
 						productKnifeModel.RealValue7Min = Lib.ToString(dttDao.Rows[i]["F42"]);
 						productKnifeModel.RealValue7Max = Lib.ToString(dttDao.Rows[i]["F43"]);
-						
+
 						productKnifeModel.RealValue8 = Lib.ToString(dttDao.Rows[i]["F44"]);
 						productKnifeModel.RealValue8Min = Lib.ToString(dttDao.Rows[i]["F45"]);
 						productKnifeModel.RealValue8Max = Lib.ToString(dttDao.Rows[i]["F46"]);
-						
+
 						productKnifeModel.RealValue9 = Lib.ToString(dttDao.Rows[i]["F47"]);
 						productKnifeModel.RealValue9Min = Lib.ToString(dttDao.Rows[i]["F48"]);
 						productKnifeModel.RealValue9Max = Lib.ToString(dttDao.Rows[i]["F49"]);
-						
+
 						productKnifeModel.RealValue10 = Lib.ToString(dttDao.Rows[i]["F50"]);
 						productKnifeModel.RealValue10Min = Lib.ToString(dttDao.Rows[i]["F51"]);
 						productKnifeModel.RealValue10Max = Lib.ToString(dttDao.Rows[i]["F52"]);
-						
+
 						productKnifeModel.RealValue11 = Lib.ToString(dttDao.Rows[i]["F53"]);
 						productKnifeModel.RealValue11Min = Lib.ToString(dttDao.Rows[i]["F54"]);
 						productKnifeModel.RealValue11Max = Lib.ToString(dttDao.Rows[i]["F55"]);
-						
+
 						productKnifeModel.RealValue12 = Lib.ToString(dttDao.Rows[i]["F56"]);
 						productKnifeModel.RealValue12Min = Lib.ToString(dttDao.Rows[i]["F57"]);
 						productKnifeModel.RealValue12Max = Lib.ToString(dttDao.Rows[i]["F58"]);
-						
+
 						productKnifeModel.RealValue13 = Lib.ToString(dttDao.Rows[i]["F59"]);
 						productKnifeModel.RealValue13Min = Lib.ToString(dttDao.Rows[i]["F60"]);
 						productKnifeModel.RealValue13Max = Lib.ToString(dttDao.Rows[i]["F61"]);
-						
+
 						productKnifeModel.RealValue14 = Lib.ToString(dttDao.Rows[i]["F62"]);
 						productKnifeModel.RealValue14Min = Lib.ToString(dttDao.Rows[i]["F63"]);
 						productKnifeModel.RealValue14Max = Lib.ToString(dttDao.Rows[i]["F64"]);
-						
+
 						productKnifeModel.RealValue15 = Lib.ToString(dttDao.Rows[i]["F65"]);
 						productKnifeModel.RealValue15Min = Lib.ToString(dttDao.Rows[i]["F66"]);
 						productKnifeModel.RealValue15Max = Lib.ToString(dttDao.Rows[i]["F67"]);
-						
+
 						productKnifeModel.RealValue16 = Lib.ToString(dttDao.Rows[i]["F68"]);
 						productKnifeModel.RealValue16Min = Lib.ToString(dttDao.Rows[i]["F69"]);
 						productKnifeModel.RealValue16Max = Lib.ToString(dttDao.Rows[i]["F70"]);
-						
+
 						productKnifeModel.RealValue17 = Lib.ToString(dttDao.Rows[i]["F71"]);
 						productKnifeModel.RealValue17Min = Lib.ToString(dttDao.Rows[i]["F72"]);
 						productKnifeModel.RealValue17Max = Lib.ToString(dttDao.Rows[i]["F73"]);
-						
+
 						productKnifeModel.RealValue18 = Lib.ToString(dttDao.Rows[i]["F74"]);
 						productKnifeModel.RealValue18Min = Lib.ToString(dttDao.Rows[i]["F75"]);
 						productKnifeModel.RealValue18Max = Lib.ToString(dttDao.Rows[i]["F76"]);
-						
+
 						productKnifeModel.RealValue19 = Lib.ToString(dttDao.Rows[i]["F77"]);
 						productKnifeModel.RealValue19Min = Lib.ToString(dttDao.Rows[i]["F78"]);
 						productKnifeModel.RealValue19Max = Lib.ToString(dttDao.Rows[i]["F79"]);
-						
+
 						productKnifeModel.RealValue20 = Lib.ToString(dttDao.Rows[i]["F80"]);
 						productKnifeModel.RealValue20Min = Lib.ToString(dttDao.Rows[i]["F81"]);
 						productKnifeModel.RealValue20Max = Lib.ToString(dttDao.Rows[i]["F82"]);
-						
+
 						productKnifeModel.RealValue21 = Lib.ToString(dttDao.Rows[i]["F83"]);
 						productKnifeModel.RealValue21Min = Lib.ToString(dttDao.Rows[i]["F84"]);
 						productKnifeModel.RealValue21Max = Lib.ToString(dttDao.Rows[i]["F85"]);
-						
+
 						productKnifeModel.RealValue22 = Lib.ToString(dttDao.Rows[i]["F86"]);
 						productKnifeModel.RealValue22Min = Lib.ToString(dttDao.Rows[i]["F87"]);
 						productKnifeModel.RealValue22Max = Lib.ToString(dttDao.Rows[i]["F88"]);
-						
+
 						productKnifeModel.RealValue23 = Lib.ToString(dttDao.Rows[i]["F89"]);
 						productKnifeModel.RealValue23Min = Lib.ToString(dttDao.Rows[i]["F90"]);
 						productKnifeModel.RealValue23Max = Lib.ToString(dttDao.Rows[i]["F91"]);
-						
+
 						productKnifeModel.RealValue24 = Lib.ToString(dttDao.Rows[i]["F92"]);
 						productKnifeModel.RealValue24Min = Lib.ToString(dttDao.Rows[i]["F93"]);
 						productKnifeModel.RealValue24Max = Lib.ToString(dttDao.Rows[i]["F94"]);
-						
+
 						productKnifeModel.RealValue25 = Lib.ToString(dttDao.Rows[i]["F95"]);
 						productKnifeModel.RealValue25Min = Lib.ToString(dttDao.Rows[i]["F96"]);
 						productKnifeModel.RealValue25Max = Lib.ToString(dttDao.Rows[i]["F97"]);
-						
+
 						productKnifeModel.RealValue26 = Lib.ToString(dttDao.Rows[i]["F98"]);
 						productKnifeModel.RealValue26Min = Lib.ToString(dttDao.Rows[i]["F99"]);
 						productKnifeModel.RealValue26Max = Lib.ToString(dttDao.Rows[i]["F100"]);
-						
+
 						productKnifeModel.RealValue27 = Lib.ToString(dttDao.Rows[i]["F101"]);
 						productKnifeModel.RealValue27Min = Lib.ToString(dttDao.Rows[i]["F102"]);
 						productKnifeModel.RealValue27Max = Lib.ToString(dttDao.Rows[i]["F103"]);
-						
+
 						productKnifeModel.RealValue28 = Lib.ToString(dttDao.Rows[i]["F104"]);
 						productKnifeModel.RealValue28Min = Lib.ToString(dttDao.Rows[i]["F105"]);
 						productKnifeModel.RealValue28Max = Lib.ToString(dttDao.Rows[i]["F106"]);
-						
+
 						productKnifeModel.RealValue29 = Lib.ToString(dttDao.Rows[i]["F107"]);
 						productKnifeModel.RealValue29Min = Lib.ToString(dttDao.Rows[i]["F108"]);
 						productKnifeModel.RealValue29Max = Lib.ToString(dttDao.Rows[i]["F109"]);
-						
+
 						productKnifeModel.RealValue30 = Lib.ToString(dttDao.Rows[i]["F110"]);
 						productKnifeModel.RealValue30Min = Lib.ToString(dttDao.Rows[i]["F111"]);
 						productKnifeModel.RealValue30Max = Lib.ToString(dttDao.Rows[i]["F112"]);
-						
+
 						productKnifeModel.RealValue31 = Lib.ToString(dttDao.Rows[i]["F113"]);
 						productKnifeModel.RealValue31Min = Lib.ToString(dttDao.Rows[i]["F114"]);
 						productKnifeModel.RealValue31Max = Lib.ToString(dttDao.Rows[i]["F115"]);
-						
+
 						productKnifeModel.RealValue32 = Lib.ToString(dttDao.Rows[i]["F116"]);
 						productKnifeModel.RealValue32Min = Lib.ToString(dttDao.Rows[i]["F117"]);
 						productKnifeModel.RealValue32Max = Lib.ToString(dttDao.Rows[i]["F118"]);
-						
+
 						productKnifeModel.RealValue33 = Lib.ToString(dttDao.Rows[i]["F119"]);
 						productKnifeModel.RealValue33Min = Lib.ToString(dttDao.Rows[i]["F120"]);
 						productKnifeModel.RealValue33Max = Lib.ToString(dttDao.Rows[i]["F121"]);
-						
+
 						productKnifeModel.RealValue34 = Lib.ToString(dttDao.Rows[i]["F122"]);
 						productKnifeModel.RealValue34Min = Lib.ToString(dttDao.Rows[i]["F123"]);
 						productKnifeModel.RealValue34Max = Lib.ToString(dttDao.Rows[i]["F124"]);
-						
+
 						productKnifeModel.RealValue35 = Lib.ToString(dttDao.Rows[i]["F125"]);
 						productKnifeModel.RealValue35Min = Lib.ToString(dttDao.Rows[i]["F126"]);
 						productKnifeModel.RealValue35Max = Lib.ToString(dttDao.Rows[i]["F127"]);
-						
+
 						productKnifeModel.RealValue36 = Lib.ToString(dttDao.Rows[i]["F128"]);
 						productKnifeModel.RealValue36Min = Lib.ToString(dttDao.Rows[i]["F129"]);
 						productKnifeModel.RealValue36Max = Lib.ToString(dttDao.Rows[i]["F130"]);
-						
+
 						productKnifeModel.RealValue37 = Lib.ToString(dttDao.Rows[i]["F131"]);
 						productKnifeModel.RealValue37Min = Lib.ToString(dttDao.Rows[i]["F132"]);
 						productKnifeModel.RealValue37Max = Lib.ToString(dttDao.Rows[i]["F133"]);
-						
+
 						productKnifeModel.RealValue38 = Lib.ToString(dttDao.Rows[i]["F134"]);
 						productKnifeModel.RealValue38Min = Lib.ToString(dttDao.Rows[i]["F135"]);
 						productKnifeModel.RealValue38Max = Lib.ToString(dttDao.Rows[i]["F136"]);
-						
+
 						productKnifeModel.RealValue39 = Lib.ToString(dttDao.Rows[i]["F137"]);
 						productKnifeModel.RealValue39Min = Lib.ToString(dttDao.Rows[i]["F138"]);
 						productKnifeModel.RealValue39Max = Lib.ToString(dttDao.Rows[i]["F139"]);
-						
+
 						productKnifeModel.RealValue40 = Lib.ToString(dttDao.Rows[i]["F140"]);
 						productKnifeModel.RealValue40Min = Lib.ToString(dttDao.Rows[i]["F141"]);
 						productKnifeModel.RealValue40Max = Lib.ToString(dttDao.Rows[i]["F142"]);
-						
+
 						productKnifeModel.RealValue41 = Lib.ToString(dttDao.Rows[i]["F143"]);
 						productKnifeModel.RealValue41Min = Lib.ToString(dttDao.Rows[i]["F144"]);
 						productKnifeModel.RealValue41Max = Lib.ToString(dttDao.Rows[i]["F145"]);
-						
+
 						productKnifeModel.RealValue42 = Lib.ToString(dttDao.Rows[i]["F146"]);
 						productKnifeModel.RealValue42Min = Lib.ToString(dttDao.Rows[i]["F147"]);
 						productKnifeModel.RealValue42Max = Lib.ToString(dttDao.Rows[i]["F148"]);
-						
+
 						productKnifeModel.RealValue43 = Lib.ToString(dttDao.Rows[i]["F149"]);
 						productKnifeModel.RealValue43Min = Lib.ToString(dttDao.Rows[i]["F150"]);
 						productKnifeModel.RealValue43Max = Lib.ToString(dttDao.Rows[i]["F151"]);
-						
+
 						productKnifeModel.RealValue44 = Lib.ToString(dttDao.Rows[i]["F152"]);
 						productKnifeModel.RealValue44Min = Lib.ToString(dttDao.Rows[i]["F153"]);
 						productKnifeModel.RealValue44Max = Lib.ToString(dttDao.Rows[i]["F154"]);
-						
+
 						productKnifeModel.RealValue45 = Lib.ToString(dttDao.Rows[i]["F155"]);
 						productKnifeModel.RealValue45Min = Lib.ToString(dttDao.Rows[i]["F156"]);
 						productKnifeModel.RealValue45Max = Lib.ToString(dttDao.Rows[i]["F157"]);
-						
+
 						productKnifeModel.RealValue46 = Lib.ToString(dttDao.Rows[i]["F158"]);
 						productKnifeModel.RealValue46Min = Lib.ToString(dttDao.Rows[i]["F159"]);
 						productKnifeModel.RealValue46Max = Lib.ToString(dttDao.Rows[i]["F160"]);
-						
+
 						productKnifeModel.RealValue47 = Lib.ToString(dttDao.Rows[i]["F161"]);
 						productKnifeModel.RealValue47Min = Lib.ToString(dttDao.Rows[i]["F162"]);
 						productKnifeModel.RealValue47Max = Lib.ToString(dttDao.Rows[i]["F163"]);
-						
+
 						//productKnifeModel.RealValue48 = Lib.ToString(dttDao.Rows[i]["F164"]);
 						//productKnifeModel.RealValue48Min = Lib.ToString(dttDao.Rows[i]["F165"]);
 						//productKnifeModel.RealValue48Max = Lib.ToString(dttDao.Rows[i]["F166"]);
-						
+
 						//productKnifeModel.RealValue49 = Lib.ToString(dttDao.Rows[i]["F167"]);
 						//productKnifeModel.RealValue49Min = Lib.ToString(dttDao.Rows[i]["F168"]);
 						//productKnifeModel.RealValue49Max = Lib.ToString(dttDao.Rows[i]["F169"]);
@@ -2050,7 +1487,6 @@ namespace BMS
 									string[] PathSplit = btnBrowseMotor.Text.Trim().Split('\\');
 									Path1 = PathSplit[PathSplit.Length - 1];
 									//Đường dẫn file Update
-									string targetPath = @"D:\FileUpdate";
 									string sourceFile = System.IO.Path.Combine(sourcePath);
 									string destFile = System.IO.Path.Combine(targetPath, Path1);
 									//Copy file từ file nguồn đến file đích
@@ -2396,9 +1832,9 @@ namespace BMS
 										//Copy file Save vào thư mục 
 										if (btnCopyOrder.Text == "") return;
 										string sourcePath = btnBrowseOrderPart.Text;
-										string targetPath = btnCopyOrder.Text;
+										string targetPath1 = btnCopyOrder.Text;
 										string sourceFile = System.IO.Path.Combine(sourcePath);
-										string destFile = System.IO.Path.Combine(targetPath, "OrderPart_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
+										string destFile = System.IO.Path.Combine(targetPath1, "OrderPart_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
 										//Copy file từ file nguồn đến file đích
 										System.IO.File.Copy(sourceFile, destFile, true);
 									}
@@ -2559,9 +1995,9 @@ namespace BMS
 										//Copy file Save vào thư mục 
 										if (btnCopyOrder.Text == "") return;
 										string sourcePath = btnBrowseOrderPart1.Text;
-										string targetPath = btnCopyOrder.Text;
+										string targetPath1 = btnCopyOrder.Text;//Thu mục copy chuyển đến 
 										string sourceFile = System.IO.Path.Combine(sourcePath);
-										string destFile = System.IO.Path.Combine(targetPath, "OrderPart1_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
+										string destFile = System.IO.Path.Combine(targetPath1, "OrderPart1_" + DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".txt");
 										//Copy file từ file nguồn đến file đích
 										System.IO.File.Copy(sourceFile, destFile, true);
 									}

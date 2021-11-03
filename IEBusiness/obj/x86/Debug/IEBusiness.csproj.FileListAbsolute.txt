@@ -370,3 +370,11 @@ D:\project\Sumitomo\PM\Current\SonPlan-STD-Lot - New - Current\IEBusiness\obj\x8
 D:\project\Sumitomo\PM\Current\SonPlan-STD-Lot - New - Current\IEBusiness\obj\x86\Debug\IEBusiness.csproj.CoreCompileInputs.cache
 D:\project\Sumitomo\PM\Current\SonPlan-STD-Lot - New - Current\IEBusiness\obj\x86\Debug\IEBusiness.dll
 D:\project\Sumitomo\PM\Current\SonPlan-STD-Lot - New - Current\IEBusiness\obj\x86\Debug\IEBusiness.pdb
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\bin\x86\Debug\IEBusiness.dll
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\bin\x86\Debug\IEBusiness.pdb
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.csproj.AssemblyReference.cache
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.Properties.Resources.resources
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.csproj.GenerateResource.cache
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.csproj.CoreCompileInputs.cache
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.dll
+D:\project\Sumitomo\PM\Current\AutoUpdate - Copy\IEBusiness\obj\x86\Debug\IEBusiness.pdb
